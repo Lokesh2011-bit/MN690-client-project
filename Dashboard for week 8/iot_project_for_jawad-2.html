@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT Anomaly Detection — Project Dashboard for Jawad</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #08101f;
+  --bg2:    #0d1930;
+  --bg3:    #101e33;
+  --card:   #0f1c30;
+  --border: rgba(255,255,255,0.07);
+  --text:   #dce8f5;
+  --muted:  #6b7fa3;
+  --teal:   #00d4aa;
+  --teal-bg:rgba(0,212,170,0.08);
+  --blue:   #4da6ff;
+  --blue-bg:rgba(77,166,255,0.08);
+  --red:    #ff5572;
+  --red-bg: rgba(255,85,114,0.08);
+  --amber:  #ffb340;
+  --amb-bg: rgba(255,179,64,0.08);
+  --green:  #3ecf8e;
+  --grn-bg: rgba(62,207,142,0.08);
+  --purple: #b69aff;
+  --pur-bg: rgba(182,154,255,0.08);
+  --font:   'IBM Plex Sans', sans-serif;
+  --mono:   'IBM Plex Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ── NAV ── */
+.topbar{position:sticky;top:0;z-index:200;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:0}
+.topbar-brand{font-size:13px;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;padding:16px 24px 16px 0;border-right:1px solid var(--border);margin-right:24px;white-space:nowrap}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto;flex:1}
+.nav-tab{padding:14px 18px;font-size:13px;color:var(--muted);cursor:pointer;border:none;background:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--font)}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.meeting-badge{margin-left:auto;padding:6px 14px;background:var(--teal-bg);border:1px solid rgba(0,212,170,0.2);border-radius:20px;font-size:11px;color:var(--teal);white-space:nowrap;font-weight:500}
+
+/* ── LAYOUT ── */
+.main{padding:32px;max-width:1100px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+.page-hd{margin-bottom:28px}
+.page-title{font-size:20px;font-weight:600;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+.card.accent-teal{border-left:3px solid var(--teal)}
+.card.accent-red{border-left:3px solid var(--red)}
+.card.accent-amber{border-left:3px solid var(--amber)}
+.card.accent-blue{border-left:3px solid var(--blue)}
+.card.accent-green{border-left:3px solid var(--green)}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ── METRICS ── */
+.metric{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.metric-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.metric-val{font-size:28px;font-weight:600;font-family:var(--mono);color:var(--text)}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.b-teal{background:var(--teal-bg);color:var(--teal)}
+.b-blue{background:var(--blue-bg);color:var(--blue)}
+.b-green{background:var(--grn-bg);color:var(--green)}
+.b-amber{background:var(--amb-bg);color:var(--amber)}
+.b-red{background:var(--red-bg);color:var(--red)}
+.b-purple{background:var(--pur-bg);color:var(--purple)}
+
+/* ── ROWS ── */
+.row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.row:last-child{border-bottom:none}
+.row-k{color:var(--muted);min-width:170px;flex-shrink:0}
+.row-v{color:var(--text);flex:1}
+
+/* ── STEPS ── */
+.step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-n{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;font-family:var(--mono)}
+.step-t{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.step-d{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── PERSONAS ── */
+.persona-wrap{margin-bottom:14px}
+.persona-card{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.persona-head{display:flex;align-items:center;gap:14px;padding:16px 22px;background:var(--bg3)}
+.p-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.p-name{font-size:14px;font-weight:500;color:var(--text)}
+.p-role{font-size:12px;color:var(--muted);margin-top:1px}
+.persona-body{padding:18px 22px;font-size:13px;color:var(--muted);line-height:1.75;border-top:1px solid var(--border)}
+.p-highlight{margin-top:12px;padding:12px 16px;border-radius:8px;font-size:12px;line-height:1.55}
+.p-connector{text-align:center;padding:8px 0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.p-connector-line{flex:1;height:1px;background:var(--border)}
+.p-arrow{font-size:18px;color:var(--muted)}
+
+/* ── ARCHITECTURE FLOW ── */
+.arch-layer{display:flex;align-items:stretch;gap:0;margin-bottom:2px}
+.arch-box{flex:1;padding:14px 16px;border:1px solid var(--border);font-size:12px;position:relative}
+.arch-box:first-child{border-radius:10px 0 0 10px}
+.arch-box:last-child{border-radius:0 10px 10px 0}
+.arch-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.arch-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.arch-arrow{display:flex;align-items:center;justify-content:center;width:28px;flex-shrink:0;color:var(--muted);font-size:18px}
+
+/* ── BASELINE ── */
+.bl-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.bl-cell{padding:14px 16px;border-radius:10px}
+.bl-title{font-size:12px;font-weight:600;margin-bottom:8px}
+.bl-row{font-size:12px;color:var(--muted);padding:3px 0;display:flex;align-items:flex-start;gap:6px}
+.bl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+
+/* ── MIND MAP / BLOCK ── */
+.mind-center{background:var(--teal-bg);border:1.5px solid var(--teal);border-radius:12px;padding:14px 20px;text-align:center;margin:0 auto 20px;max-width:340px}
+.mind-center-title{font-size:15px;font-weight:600;color:var(--teal)}
+.mind-center-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.mind-branches{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mind-branch{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.mind-branch-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.mind-branch-item{font-size:11px;color:var(--muted);padding:3px 0;display:flex;gap:6px;align-items:flex-start}
+.mind-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:6px}
+
+/* ── TIMELINE ── */
+.tl-row{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
+.tl-row:last-child{border-bottom:none}
+.tl-wk{min-width:82px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--mono);text-align:center;flex-shrink:0}
+.tl-t{font-size:13px;font-weight:500;color:var(--text)}
+.tl-d{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── TEAM ── */
+.team-row{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.team-row:last-child{border-bottom:none}
+.t-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.t-name{font-size:13px;font-weight:500;color:var(--text)}
+.t-role{font-size:12px;color:var(--muted);margin-top:1px}
+.t-backup{font-size:11px;margin-top:4px;padding:3px 10px;border-radius:20px;display:inline-flex}
+
+/* ── CODE ── */
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-family:var(--mono);font-size:12px;color:#7dd3fc;margin:8px 0;overflow-x:auto;white-space:pre;line-height:1.7}
+.code-label{font-size:11px;color:var(--muted);margin-bottom:4px;margin-top:12px}
+
+/* ── SECURITY PRINCIPLES ── */
+.principle{padding:18px 20px;border-radius:12px;border:1px solid;margin-bottom:12px}
+.principle-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.principle-body{font-size:13px;line-height:1.65}
+.principle-examples{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:4px}
+
+/* ── STATUS DOTS ── */
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
+.sdot-green{background:#3ecf8e;box-shadow:0 0 6px #3ecf8e}
+.sdot-amber{background:#ffb340;box-shadow:0 0 6px #ffb340}
+.sdot-red{background:#ff5572}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <div class="topbar-brand">IoT Sentinel — APM</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="show('proof',this)">📋 Proof of Work</button>
+    <button class="nav-tab" onclick="show('mindmap',this)">🗺️ Block Diagram</button>
+    <button class="nav-tab" onclick="show('dataset',this)">📦 Dataset</button>
+    <button class="nav-tab" onclick="show('baseline',this)">📊 Baselines</button>
+    <button class="nav-tab" onclick="show('arch',this)">🏗️ Architecture</button>
+    <button class="nav-tab" onclick="show('personas',this)">👥 Personas</button>
+    <button class="nav-tab" onclick="show('team',this)">🙋 Team Roles</button>
+    <button class="nav-tab" onclick="show('plan',this)">📅 Project Plan</button>
+  </div>
+  <div class="meeting-badge">Next meeting: Fortnightly</div>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════
+     TAB 1 — PROOF OF WORK
+══════════════════════════════════════════════════ -->
+<div id="proof" class="panel active">
+  <div class="page-hd">
+    <div class="page-title">Proof of Work — Where We Are Right Now</div>
+    <div class="page-sub">Evidence of what the team has completed — Sprint Week 8 of 24</div>
+  </div>
+
+  <div class="g4" style="margin-bottom:20px">
+    <div class="metric"><div class="metric-lbl">Dataset files</div><div class="metric-val">23/23</div><div class="metric-sub">IoT-23 CSV files downloaded</div></div>
+    <div class="metric"><div class="metric-lbl">Research papers</div><div class="metric-val">25</div><div class="metric-sub">Literature reviewed</div></div>
+    <div class="metric"><div class="metric-lbl">Sprint</div><div class="metric-val">Wk 8</div><div class="metric-sub">of 24 total weeks</div></div>
+    <div class="metric"><div class="metric-lbl">Prototype ETA</div><div class="metric-val">Wk 12</div><div class="metric-sub">Trimester 1 delivery</div></div>
+  </div>
+
+  <div class="card accent-teal">
+    <div class="card-title">Completed tasks this sprint</div>
+    <div class="step">
+      <div class="step-n" style="background:var(--grn-bg);color:var(--green)">✓</div>
+      <div><div class="step-t">IoT-23 dataset downloaded from Kaggle</div><div class="step-d">15 CSV files extracted — dataset1.csv through dataset15.csv. 23 labelled network traffic captures from real IoT devices. CC0 Public Domain license. All 23 files successfully downloaded and extracted.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--grn-bg);color:var(--green)">✓</div>
+      <div><div class="step-t">Dataset features and columns confirmed</div><div class="step-d">Key columns verified: duration, orig_bytes, resp_bytes, proto, service, conn_state, label, detailed-label. All features needed for anomaly detection are present in the data.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--grn-bg);color:var(--green)">✓</div>
+      <div><div class="step-t">GitHub repository created</div><div class="step-d">Team repository set up with folder structure: /data, /models, /dashboard, /docs. All 5 team members have access. Version control active.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--grn-bg);color:var(--green)">✓</div>
+      <div><div class="step-t">25 research papers reviewed</div><div class="step-d">Literature covering IoT anomaly detection, Isolation Forest, Local Outlier Factor, network traffic classification, and APM-relevant threat scenarios.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--amb-bg);color:var(--amber)">↻</div>
+      <div><div class="step-t">Trello board — in progress</div><div class="step-d">Tasks being assigned per member with statuses: To Do, In Progress, Done. Kanban board with fortnightly sprint structure being set up now.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--amb-bg);color:var(--amber)">↻</div>
+      <div><div class="step-t">Data preprocessing — starting this week</div><div class="step-d">Naveen (Data Engineer) beginning cleaning pipeline. Feature selection and normalisation to be completed by Wk 3–4.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Run these in Terminal — show as live evidence to Jawad</div>
+    <div class="code-label">How many files we have downloaded:</div>
+    <div class="code-block">ls ~/Downloads/dataset*.csv | wc -l</div>
+    <div class="code-label">See all column names in the dataset:</div>
+    <div class="code-block">head -1 ~/Downloads/dataset1.csv</div>
+    <div class="code-label">See first 5 rows of actual traffic data:</div>
+    <div class="code-block">head -5 ~/Downloads/dataset1.csv</div>
+    <div class="code-label">Count total rows in one file:</div>
+    <div class="code-block">wc -l ~/Downloads/dataset1.csv</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Current status overview</div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-green"></span>Dataset downloaded</span><span class="row-v">23 of 23 CSV files — IoT-23 fully downloaded from Kaggle (CC0)</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-green"></span>GitHub repo</span><span class="row-v">Created with full folder structure — all members added</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-green"></span>Literature review</span><span class="row-v">25 papers reviewed covering IoT security and ML anomaly detection</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-amber"></span>Trello board</span><span class="row-v">Being set up — tasks assigned with sprint structure</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-amber"></span>Data preprocessing</span><span class="row-v">Starting this week — Naveen leading pipeline build</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-red"></span>ML models</span><span class="row-v">Not started — begins Week 9 after data is clean and baselines are built</span></div>
+    <div class="row"><span class="row-k"><span class="sdot sdot-red"></span>Dashboard</span><span class="row-v">Not started — Kishore begins after ML outputs are ready (Wk 11)</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 2 — BLOCK DIAGRAM / MIND MAP
+══════════════════════════════════════════════════ -->
+<div id="mindmap" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Block Diagram — How the Whole Project Works</div>
+    <div class="page-sub">Full project overview: what we are building, tools we are using, and how everything connects</div>
+  </div>
+
+  <div class="card accent-teal">
+    <div class="mind-center">
+      <div class="mind-center-title">IoT Anomaly Detection System</div>
+      <div class="mind-center-sub">Built for APM · 24 weeks · 5 members</div>
+    </div>
+    <div class="mind-branches">
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--blue)">📦</span> Data Layer</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--blue)"></span>IoT-23 dataset (Kaggle)</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--blue)"></span>23 CSV files — real IoT traffic</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--blue)"></span>Pandas — data cleaning</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--blue)"></span>NumPy — feature engineering</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--blue)"></span>Naveen (Data Engineer)</div>
+      </div>
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--teal)">🧠</span> ML Layer</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--teal)"></span>Isolation Forest</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--teal)"></span>Local Outlier Factor (LOF)</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--teal)"></span>Scikit-learn (Python)</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--teal)"></span>Weka (comparison tool)</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--teal)"></span>Loki (ML Engineer)</div>
+      </div>
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--purple)">📊</span> Dashboard Layer</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--purple)"></span>Streamlit (Python web app)</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--purple)"></span>Plotly — interactive charts</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--purple)"></span>Device risk ranking</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--purple)"></span>Live alert feed</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--purple)"></span>Kishore (Full Stack Dev)</div>
+      </div>
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--red)">🔐</span> Security Layer</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--red)"></span>Secure by Design</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--red)"></span>Secure by Default</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--red)"></span>Zero Trust Principle</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--red)"></span>Audit logging / NDB compliance</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--red)"></span>Mani (Cybersecurity Analyst)</div>
+      </div>
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--green)">📡</span> Network Layer</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--green)"></span>IoT device traffic profiles</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--green)"></span>Normal behaviour baselines</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--green)"></span>Feature: flow duration</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--green)"></span>Feature: packet count / bytes</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--green)"></span>Navoda (Network Analyst)</div>
+      </div>
+      <div class="mind-branch">
+        <div class="mind-branch-title"><span style="color:var(--amber)">🛠️</span> Project Tools</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--amber)"></span>GitHub — version control</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--amber)"></span>Trello — sprint tracking</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--amber)"></span>Jupyter Notebook — dev</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--amber)"></span>Matplotlib / Seaborn — charts</div>
+        <div class="mind-branch-item"><span class="mind-dot" style="background:var(--amber)"></span>All tools: 100% free / open source</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How the project flows — end to end</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div class="arch-layer">
+        <div class="arch-box" style="background:var(--blue-bg);border-color:rgba(77,166,255,0.2)">
+          <div class="arch-label" style="color:var(--blue)">Step 1 — Collect</div>
+          <div class="arch-desc">IoT-23 CSV files containing real IoT device traffic: cameras, sensors, access control. Labelled benign and malicious.</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="background:var(--teal-bg);border-color:rgba(0,212,170,0.2)">
+          <div class="arch-label" style="color:var(--teal)">Step 2 — Clean</div>
+          <div class="arch-desc">Pandas removes nulls, encodes protocols, normalises bytes, selects key features: duration, bytes, proto, conn_state.</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="background:var(--grn-bg);border-color:rgba(62,207,142,0.2)">
+          <div class="arch-label" style="color:var(--green)">Step 3 — Baseline</div>
+          <div class="arch-desc">Build normal behaviour profiles per device type. What does a camera normally do? What does a door lock normally do?</div>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:20px;padding:2px">↓</div>
+      <div class="arch-layer">
+        <div class="arch-box" style="background:var(--amb-bg);border-color:rgba(255,179,64,0.2)">
+          <div class="arch-label" style="color:var(--amber)">Step 4 — Detect</div>
+          <div class="arch-desc">Isolation Forest + LOF (Scikit-learn + Weka) trained on data. Any device deviating from normal gets an anomaly score.</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="background:var(--red-bg);border-color:rgba(255,85,114,0.2)">
+          <div class="arch-label" style="color:var(--red)">Step 5 — Alert</div>
+          <div class="arch-desc">If score exceeds threshold AND both models agree → alert fired. Logged immutably for NDB compliance reporting.</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="background:var(--pur-bg);border-color:rgba(182,154,255,0.2)">
+          <div class="arch-label" style="color:var(--purple)">Step 6 — Dashboard</div>
+          <div class="arch-desc">Streamlit shows APM's security team: which device, which office, what happened, risk level, timeline, compliance export.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 3 — DATASET
+══════════════════════════════════════════════════ -->
+<div id="dataset" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Dataset — IoT-23</div>
+    <div class="page-sub">Why we chose it, what it contains, and what the data actually looks like</div>
+  </div>
+
+  <div class="card accent-teal">
+    <div class="card-title">Why IoT-23 over the other two options</div>
+    <div class="g3">
+      <div style="padding:16px;border:2px solid var(--teal);border-radius:10px;background:var(--teal-bg)">
+        <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:8px">✓ IoT-23 — Selected</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">Captured from real smart home IoT devices. Multiple attack types: botnet, C&amp;C communication, DDoS, port scans. 23 labelled captures. Closest match to APM's actual office environment.</div>
+      </div>
+      <div style="padding:16px;border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">UNSW-NB15 — Backup</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">General network traffic — not IoT-specific. Doesn't reflect how APM's cameras, sensors, and access control devices actually behave.</div>
+      </div>
+      <div style="padding:16px;border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">BoT-IoT — Backup</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">IoT traffic but only covers botnet attacks. Too narrow — would miss data exfiltration and C&amp;C threats which are highly relevant for APM.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key features — what the data contains</div>
+    <div class="row"><span class="row-k">duration</span><span class="row-v">How long the network connection lasted (seconds)</span></div>
+    <div class="row"><span class="row-k">orig_bytes</span><span class="row-v">Bytes sent from the IoT device</span></div>
+    <div class="row"><span class="row-k">resp_bytes</span><span class="row-v">Bytes received by the IoT device</span></div>
+    <div class="row"><span class="row-k">proto</span><span class="row-v">Protocol used: TCP, UDP, ICMP</span></div>
+    <div class="row"><span class="row-k">service</span><span class="row-v">Application layer: HTTP, DNS, MQTT, SSH</span></div>
+    <div class="row"><span class="row-k">conn_state</span><span class="row-v">Was connection established, rejected, or reset?</span></div>
+    <div class="row"><span class="row-k">label</span><span class="row-v">Benign (normal) or Malicious (attack) — ground truth</span></div>
+    <div class="row"><span class="row-k">detailed-label</span><span class="row-v">Specific attack: C&amp;C, DDoS, PartOfAHorizontalPortScan, Okiru botnet</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Dataset facts</div>
+    <div class="row"><span class="row-k">Source</span><span class="row-v">Stratosphere Laboratory, Czech Technical University in Prague</span></div>
+    <div class="row"><span class="row-k">Downloaded from</span><span class="row-v">Kaggle.com — search "IoT-23 Full Dataset"</span></div>
+    <div class="row"><span class="row-k">License</span><span class="row-v"><span class="badge b-green">CC0 Public Domain — free to use for any purpose</span></span></div>
+    <div class="row"><span class="row-k">Format</span><span class="row-v">23 preprocessed CSV files — no manual PCAP handling needed</span></div>
+    <div class="row"><span class="row-k">Kaggle usability score</span><span class="row-v">9.41 / 10 — one of the highest rated cybersecurity datasets</span></div>
+    <div class="row"><span class="row-k">Files downloaded</span><span class="row-v">15 of 23 — remaining 8 pending disk space clearance</span></div>
+    <div class="row"><span class="row-k">Cost to APM</span><span class="row-v"><span class="badge b-green">$0 — completely free</span></span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 4 — BASELINE SCENARIOS
+══════════════════════════════════════════════════ -->
+<div id="baseline" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Baseline Scenarios</div>
+    <div class="page-sub">What normal IoT device behaviour looks like versus what an attack looks like — for APM's specific devices</div>
+  </div>
+
+  <div class="card accent-blue">
+    <div class="card-title">Smart door lock — access control system</div>
+    <div class="bl-pair">
+      <div class="bl-cell" style="background:var(--grn-bg);border:1px solid rgba(62,207,142,0.2)">
+        <div class="bl-title" style="color:var(--green)">✓ Normal behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>10–15 small packets per hour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Communicates with 2 known internal servers only</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Active only during business hours 8am–6pm</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Average 45 bytes per packet</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Connection state: established and closed cleanly</div>
+      </div>
+      <div class="bl-cell" style="background:var(--red-bg);border:1px solid rgba(255,85,114,0.2)">
+        <div class="bl-title" style="color:var(--red)">✗ Attack behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>1,000+ packets per minute — sudden spike</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>New unknown IP address — Eastern Europe server</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Activity at 2am — outside all business hours</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Scanning 47 internal hosts it never contacted before</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Large encrypted payload — 800+ bytes per packet</div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--amb-bg);border-radius:8px;font-size:12px;color:var(--amber)">
+      <strong>What our ML model does:</strong> Isolation Forest sees this device's traffic is isolated far from all normal data points. LOF sees it behaves completely differently from all other access control devices nearby. Both models agree — anomaly score: 94/100. Alert fired within seconds.
+    </div>
+  </div>
+
+  <div class="card accent-blue">
+    <div class="card-title">IP camera — CCTV surveillance</div>
+    <div class="bl-pair">
+      <div class="bl-cell" style="background:var(--grn-bg);border:1px solid rgba(62,207,142,0.2)">
+        <div class="bl-title" style="color:var(--green)">✓ Normal behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Streams only to 1 internal recording server</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Consistent 2–4 Mbps bandwidth</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>UDP protocol only</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>No outbound external connections ever</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Predictable continuous stream pattern</div>
+      </div>
+      <div class="bl-cell" style="background:var(--red-bg);border:1px solid rgba(255,85,114,0.2)">
+        <div class="bl-title" style="color:var(--red)">✗ Attack behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Exfiltrating data to overseas server</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Bandwidth spike to 18 Mbps — 5x normal</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Unexpected TCP connection opened</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>New external IP never seen before</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Encrypted payload — content hidden from inspection</div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--amb-bg);border-radius:8px;font-size:12px;color:var(--amber)">
+      <strong>What our ML model does:</strong> Detects bandwidth anomaly (5x baseline), new destination IP, and protocol shift from UDP to TCP simultaneously. All three features are far outside the learned normal range. Alert: data exfiltration in progress.
+    </div>
+  </div>
+
+  <div class="card accent-blue">
+    <div class="card-title">Smart sensor — environment / temperature monitoring</div>
+    <div class="bl-pair">
+      <div class="bl-cell" style="background:var(--grn-bg);border:1px solid rgba(62,207,142,0.2)">
+        <div class="bl-title" style="color:var(--green)">✓ Normal behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Sends small report every 5 minutes</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Payload: 20–30 bytes only</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Single known destination server</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>MQTT protocol — lightweight IoT standard</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--green)"></span>Completely predictable timing</div>
+      </div>
+      <div class="bl-cell" style="background:var(--red-bg);border:1px solid rgba(255,85,114,0.2)">
+        <div class="bl-title" style="color:var(--red)">✗ Attack behaviour</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Reports every 2 seconds — 150x faster than normal</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Payload suddenly 800 bytes — 30x larger</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Connecting to multiple unknown destinations</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>C&amp;C communication pattern detected</div>
+        <div class="bl-row"><span class="bl-dot" style="background:var(--red)"></span>Botnet recruitment — device under remote control</div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--amb-bg);border-radius:8px;font-size:12px;color:var(--amber)">
+      <strong>What our ML model does:</strong> Inter-arrival time drops from 300 seconds to 2 seconds. Byte count multiplies 30x. Both are extreme outliers in the learned distribution. Botnet C&amp;C pattern confirmed. Device isolated from network pending investigation.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How the ML model learns and applies the baselines</div>
+    <div class="step">
+      <div class="step-n" style="background:var(--blue-bg);color:var(--blue)">1</div>
+      <div><div class="step-t">Training phase — learn what normal looks like</div><div class="step-d">Feed IoT-23 traffic into Isolation Forest and LOF. Both are unsupervised — they learn purely from traffic patterns without needing attack labels. They build a statistical model of "normal" per device type.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--blue-bg);color:var(--blue)">2</div>
+      <div><div class="step-t">Scoring phase — rate every new flow</div><div class="step-d">Every new network flow gets an anomaly score from 0 to 100. Flows that match the learned baseline score near 0. Flows that deviate significantly score near 100.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--amb-bg);color:var(--amber)">3</div>
+      <div><div class="step-t">Ensemble check — both models must agree</div><div class="step-d">Isolation Forest AND LOF must both flag the same flow before an alert is raised. This ensemble approach significantly reduces false positives — your team only gets alerted on real threats.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--red-bg);color:var(--red)">4</div>
+      <div><div class="step-t">Alert raised on dashboard</div><div class="step-d">If score exceeds threshold AND both models agree → alert fires on Streamlit dashboard. Shows Priya (security analyst): device, location, what happened, risk level, and timeline. Audit log created for NDB compliance.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 5 — ARCHITECTURE
+══════════════════════════════════════════════════ -->
+<div id="arch" class="panel">
+  <div class="page-hd">
+    <div class="page-title">System Architecture</div>
+    <div class="page-sub">Three security principles applied throughout the entire system</div>
+  </div>
+
+  <div class="principle" style="background:var(--blue-bg);border-color:rgba(77,166,255,0.3)">
+    <div class="principle-title" style="color:var(--blue)">🔵 Secure by Design</div>
+    <div class="principle-body" style="color:var(--muted)">Security is not added on top later — it is designed into every single layer from day one. Every component of our pipeline is built with security as a core requirement, not an afterthought. If a layer cannot be built securely, we redesign the layer.</div>
+    <div class="principle-examples">
+      <span class="badge b-blue">Encryption in transit</span>
+      <span class="badge b-blue">Access-controlled data storage</span>
+      <span class="badge b-blue">Immutable audit logs</span>
+      <span class="badge b-blue">Input validation on all data</span>
+      <span class="badge b-blue">Least privilege access</span>
+    </div>
+  </div>
+
+  <div class="principle" style="background:var(--teal-bg);border-color:rgba(0,212,170,0.3)">
+    <div class="principle-title" style="color:var(--teal)">🟢 Secure by Default</div>
+    <div class="principle-body" style="color:var(--muted)">The system is in its most secure state the moment it is switched on — without any manual configuration required. APM's IT team does not need to enable security features. Monitoring is on by default. The dashboard requires login by default. No data is shared externally by default.</div>
+    <div class="principle-examples">
+      <span class="badge b-teal">Monitoring always on</span>
+      <span class="badge b-teal">Dashboard login required</span>
+      <span class="badge b-teal">Alerts enabled from day one</span>
+      <span class="badge b-teal">No open ports by default</span>
+      <span class="badge b-teal">Role-based access out of box</span>
+    </div>
+  </div>
+
+  <div class="principle" style="background:var(--amb-bg);border-color:rgba(255,179,64,0.3)">
+    <div class="principle-title" style="color:var(--amber)">🟡 Zero Trust Principle</div>
+    <div class="principle-body" style="color:var(--muted)">No device, no user, and no network connection is automatically trusted — even if it is already inside APM's network. Every IoT device is treated as potentially compromised until its behaviour is verified as normal. A device that has been connected for 3 years gets the same scrutiny as one connected yesterday.</div>
+    <div class="principle-examples">
+      <span class="badge b-amber">All devices monitored equally</span>
+      <span class="badge b-amber">No implicit trust by location</span>
+      <span class="badge b-amber">Every connection verified</span>
+      <span class="badge b-amber">Continuous verification</span>
+      <span class="badge b-amber">Behaviour-based trust only</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Full system architecture — 6 layers</div>
+    <div class="step">
+      <div class="step-n" style="background:var(--blue-bg);color:var(--blue)">1</div>
+      <div><div class="step-t">IoT Device Layer — APM's 500+ offices</div><div class="step-d">Cameras, access control systems, smart sensors, medical devices, printers. All traffic captured at network flow level. Zero Trust: every device monitored regardless of history.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--amb-bg);color:var(--amber)">2</div>
+      <div><div class="step-t">Zero Trust Verification Boundary</div><div class="step-d">All traffic passes through a verification boundary. Nothing is trusted because it is "inside" the network. Every packet is logged and queued for analysis.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--blue-bg);color:var(--blue)">3</div>
+      <div><div class="step-t">Data Pipeline — Naveen (Data Engineer)</div><div class="step-d">IoT-23 data cleaned with Pandas. Missing values handled, protocols encoded, bytes normalised, features extracted. Secure by Design: no raw personal data stored, all processing encrypted.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--teal-bg);color:var(--teal)">4</div>
+      <div><div class="step-t">ML Detection Engine — Loki (ML Engineer)</div><div class="step-d">Isolation Forest + LOF via Scikit-learn and Weka. Learns normal baseline per device. Assigns anomaly score to every flow. Ensemble: both models must agree before alert fires.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--red-bg);color:var(--red)">5</div>
+      <div><div class="step-t">Alert and Audit Engine — Mani (Cybersecurity Analyst)</div><div class="step-d">Anomaly scored and logged immutably. Compliance with Australian Privacy Act and Notifiable Data Breaches (NDB) scheme. Evidence preserved for reporting.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-n" style="background:var(--pur-bg);color:var(--purple)">6</div>
+      <div><div class="step-t">Streamlit Dashboard — Kishore (Full Stack Developer)</div><div class="step-d">APM security team sees: device risk ranking, live alert feed, anomaly timeline, traffic comparison, one-click NDB compliance export. Secure by Default: login required, role-based access.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 6 — PERSONAS
+══════════════════════════════════════════════════ -->
+<div id="personas" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Persona Examples</div>
+    <div class="page-sub">Three connected characters showing the full attack lifecycle — and how our system stops it</div>
+  </div>
+
+  <div class="card" style="background:var(--teal-bg);border-color:rgba(0,212,170,0.2);margin-bottom:20px">
+    <div style="font-size:13px;color:var(--muted);line-height:1.7">
+      <strong style="color:var(--teal)">The story in one sentence:</strong> Sarah unknowingly creates a security loophole, Marcus exploits it to attack APM, and Priya uses our system to detect and stop him before any data is stolen. This is the exact threat scenario our system is built to prevent.
+    </div>
+  </div>
+
+  <!-- PERSONA 1 — ATTACKER -->
+  <div class="persona-wrap">
+    <div class="persona-card">
+      <div class="persona-head">
+        <div class="p-avatar" style="background:var(--red-bg);color:var(--red)">MA</div>
+        <div>
+          <div class="p-name">Marcus — Persona 1: The Attacker</div>
+          <div class="p-role">External cybercriminal · Targeting APM's patient and employee data</div>
+        </div>
+        <span class="badge b-red" style="margin-left:auto">External Threat</span>
+      </div>
+      <div class="persona-body">
+        <strong style="color:var(--text)">Background:</strong> Marcus is a financially motivated cybercriminal who sells stolen personal data on underground markets. He specifically targets healthcare and human services organisations because they hold high-value data — patient records, employment details, and financial information.
+        <br><br>
+        <strong style="color:var(--text)">The attack:</strong> Marcus pre-loads malware onto cheap IoT devices — smart plugs and USB hubs — and sells them through third-party retailers at suspiciously low prices. When one of these devices connects to a corporate network, it silently contacts his command and control server and begins mapping the internal network. He never directly attacks the organisation. He uses the compromised IoT device as his invisible entry point.
+        <br><br>
+        <strong style="color:var(--text)">Why he targets IoT specifically:</strong> IoT devices cannot run antivirus. They rarely receive security updates. IT teams don't monitor them the same way they monitor laptops. They are the weakest link in any corporate network — and Marcus knows it.
+        <div class="p-highlight" style="background:var(--red-bg);color:var(--red)">
+          <strong>Attack indicators our system detects:</strong> Outbound connection to known C&amp;C IP ranges. Device scanning 47 internal hosts it has never communicated with. Traffic to overseas server at 2am. Payload size 30x larger than normal. Both Isolation Forest and LOF flag immediately — anomaly score: 97/100.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-connector"><div class="p-connector-line"></div><span class="p-arrow">↓</span> Marcus needs a device inside APM's network — that's where Sarah comes in <span class="p-arrow">↓</span><div class="p-connector-line"></div></div>
+
+  <!-- PERSONA 2 — VICTIM -->
+  <div class="persona-wrap">
+    <div class="persona-card">
+      <div class="persona-head">
+        <div class="p-avatar" style="background:var(--amb-bg);color:var(--amber)">SA</div>
+        <div>
+          <div class="p-name">Sarah — Persona 2: The Low-Awareness Employee</div>
+          <div class="p-role">APM office administrator · Melbourne branch · No formal cybersecurity training</div>
+        </div>
+        <span class="badge b-amber" style="margin-left:auto">Internal Vulnerability</span>
+      </div>
+      <div class="persona-body">
+        <strong style="color:var(--text)">Background:</strong> Sarah has worked at APM for 4 years and is excellent at her job. She manages client appointments, coordinates health services, and handles administrative tasks. She has received no formal cybersecurity training and does not think of herself as a security risk.
+        <br><br>
+        <strong style="color:var(--text)">How she creates the vulnerability:</strong> Sarah buys a cheap smart plug from an online marketplace to charge her devices at her desk. She plugs it into the office network without any malicious intent. She has no idea the device came pre-loaded with firmware that connects to Marcus's server. She notices nothing unusual — the plug charges her phone perfectly.
+        <br><br>
+        <strong style="color:var(--text)">What she does not know:</strong> The smart plug joins APM's network and immediately begins communicating with an overseas server. Over 3 days it silently maps internal network topology, identifying file servers and databases containing patient records. Sarah continues working normally, completely unaware anything is wrong.
+        <div class="p-highlight" style="background:var(--amb-bg);color:var(--amber)">
+          <strong>The loophole Sarah created (unintentionally):</strong> She connected an unverified IoT device to APM's production network. This is not her fault — it is a process gap. APM has no policy about personal IoT devices. Our system addresses this at the network level: even if Sarah connects the device, the anomalous behaviour is detected within minutes.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-connector"><div class="p-connector-line"></div><span class="p-arrow">↓</span> Our system detects the attack — Priya gets the alert and responds <span class="p-arrow">↓</span><div class="p-connector-line"></div></div>
+
+  <!-- PERSONA 3 — DEFENDER -->
+  <div class="persona-wrap">
+    <div class="persona-card">
+      <div class="persona-head">
+        <div class="p-avatar" style="background:var(--grn-bg);color:var(--green)">PR</div>
+        <div>
+          <div class="p-name">Priya — Persona 3: The Cybersecurity Analyst</div>
+          <div class="p-role">APM security engineer · Monitors the dashboard daily · First responder to alerts</div>
+        </div>
+        <span class="badge b-green" style="margin-left:auto">Defender</span>
+      </div>
+      <div class="persona-body">
+        <strong style="color:var(--text)">Background:</strong> Priya is APM's cybersecurity engineer responsible for monitoring the organisation's network security. She has 6 years of experience in incident response. Her biggest challenge before this system was the sheer volume of devices to monitor across 500+ offices — it was impossible to do manually.
+        <br><br>
+        <strong style="color:var(--text)">A normal morning with the system:</strong> Priya logs into the Streamlit dashboard at 9:00am. The dashboard shows all devices green — normal behaviour — except one. A smart plug at the Melbourne Fitzroy office has a critical anomaly score of 97/100. The dashboard shows her: the device ID, office location, a timeline starting 3 days ago, the specific traffic that triggered the alert, and a side-by-side comparison of normal vs current behaviour.
+        <br><br>
+        <strong style="color:var(--text)">Her response:</strong> She remotely isolates the device from the network in one click. She exports the NDB compliance report automatically generated by the system. She notifies the branch manager and Sarah. She flags Marcus's C&amp;C server IP for blacklisting across all APM offices. Total response time: 12 minutes.
+        <div class="p-highlight" style="background:var(--grn-bg);color:var(--green)">
+          <strong>Without our system:</strong> This attack could have gone undetected for weeks or months. By the time it was discovered, Marcus would have exfiltrated patient records and employee data. With our system, it was caught on day 3 before a single byte of sensitive data left the network.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 7 — TEAM ROLES
+══════════════════════════════════════════════════ -->
+<div id="team" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Team Roles and Dashboard Visualisation</div>
+    <div class="page-sub">Who does what — primary roles, backup roles, and current task status</div>
+  </div>
+
+  <div class="card accent-teal">
+    <div class="card-title">Team members and responsibilities</div>
+    <div class="team-row">
+      <div style="flex:1">
+        <div class="t-name">Mani Kantaeswar Reddy <span class="badge b-red" style="margin-left:6px">Cybersecurity Analyst</span></div>
+        <div class="t-role">Define attack scenarios, validate anomaly detection results against known threats, compliance mapping to Australian Privacy Act and NDB scheme</div>
+        <span class="t-backup" style="background:var(--grn-bg);color:var(--green)">Backup: Network Analyst Support</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><span class="badge b-amber">In progress</span></div>
+    </div>
+    <div class="team-row">
+      <div style="flex:1">
+        <div class="t-name">Lokesh Adithya (Loki) <span class="badge b-teal" style="margin-left:6px">ML Engineer</span></div>
+        <div class="t-role">Train Isolation Forest and LOF using Scikit-learn and Weka, hyperparameter tuning, evaluate precision/recall/F1, compare model performance</div>
+        <span class="t-backup" style="background:var(--blue-bg);color:var(--blue)">Backup: Data Engineer Support</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><span class="badge b-amber">Starting Wk 9</span></div>
+    </div>
+    <div class="team-row">
+      <div style="flex:1">
+        <div class="t-name">Navoda <span class="badge b-blue" style="margin-left:6px">Data Engineer</span></div>
+        <div class="t-role">Source and clean IoT-23 dataset, build preprocessing pipeline, feature engineering, dataset partitioning for training and testing</div>
+        <span class="t-backup" style="background:var(--teal-bg);color:var(--teal)">Backup: ML Engineer Support</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><span class="badge b-green">Environment ready</span></div>
+    </div>
+    <div class="team-row">
+      <div style="flex:1">
+        <div class="t-name">Naveen <span class="badge b-amber" style="margin-left:6px">Network Analyst</span></div>
+        <div class="t-role">Analyse IoT traffic patterns from IoT-23, define normal device baselines, validate that selected network features reflect real IoT behaviour</div>
+        <span class="t-backup" style="background:var(--pur-bg);color:var(--purple)">Backup: Full Stack Dev Support</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><span class="badge b-amber">In progress</span></div>
+    </div>
+    <div class="team-row">
+      <div style="flex:1">
+        <div class="t-name">Kishore <span class="badge b-purple" style="margin-left:6px">Full Stack Developer</span></div>
+        <div class="t-role">Build Streamlit dashboard, integrate ML model outputs, device risk ranking UI, compliance report export, manage GitHub repository</div>
+        <span class="t-backup" style="background:var(--amb-bg);color:var(--amber)">Backup: Network Analyst Support</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><span class="badge b-green">GitHub set up</span></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">No one sits idle — backup role rule</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">
+        Jawad specifically asked: if your primary work is waiting on another phase, you step into your backup role. Here is how this works in practice right now:
+        <br><br>
+        <strong style="color:var(--text)">Loki (ML Engineer)</strong> cannot train models yet because the data is still being cleaned. So this week Loki is: setting up the Python environment, reviewing Weka, preparing test cases, and helping Naveen identify which features matter most for the models.
+        <br><br>
+        <strong style="color:var(--text)">Kishore (Full Stack Developer)</strong> cannot build the dashboard until model outputs exist. So this week Kishore is: building the GitHub structure, creating a basic Streamlit skeleton with placeholder charts, and scripting the data loading pipeline.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">What Jawad should expect from each person next meeting</div>
+      <div class="row"><span class="row-k" style="min-width:70px">Mani</span><span class="row-v">Attack scenario documentation + compliance mapping draft</span></div>
+      <div class="row"><span class="row-k" style="min-width:70px">Naveen</span><span class="row-v">Clean CSV file + feature schema document + preprocessing code</span></div>
+      <div class="row"><span class="row-k" style="min-width:70px">Loki</span><span class="row-v">Weka first experiment results + Python environment + test case list</span></div>
+      <div class="row"><span class="row-k" style="min-width:70px">Navoda</span><span class="row-v">Normal behaviour baseline profiles for 3 device types</span></div>
+      <div class="row"><span class="row-k" style="min-width:70px">Kishore</span><span class="row-v">GitHub repo with folders + basic Streamlit skeleton running</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 8 — PROJECT PLAN
+══════════════════════════════════════════════════ -->
+<div id="plan" class="panel">
+  <div class="page-hd">
+    <div class="page-title">Project Plan — Fortnightly Milestones</div>
+    <div class="page-sub">Exactly where we are and what you can expect from us every 2 weeks</div>
+  </div>
+
+  <div class="card" style="background:var(--teal-bg);border-color:rgba(0,212,170,0.25)">
+    <div class="card-title" style="color:var(--teal)">Where we are right now — End of Week 8</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+      Dataset IoT-23 fully downloaded (23/23 files). GitHub repository active. 25 papers reviewed. Roles confirmed. Trello board live. Preprocessing pipeline underway. Weka installed and first experiments being run.
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Overall project progress — Week 8 of 24</div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:33%;background:var(--teal)"></div></div>
+    <div style="font-size:11px;color:var(--teal);margin-top:4px">33% complete — on track</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Trimester 1 — Weeks 1 to 12 (Prototype delivery at end)</div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--grn-bg);color:var(--green)">Wk 1–2</div>
+      <div><div class="tl-t">Kickoff <span class="badge b-green" style="margin-left:6px">✓ Done</span></div><div class="tl-d">Roles confirmed, IoT-23 downloaded, GitHub created, 25 papers reviewed, architecture designed</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--blue-bg);color:var(--blue)">Wk 3–4</div>
+      <div><div class="tl-t">Data preparation <span class="badge b-amber" style="margin-left:6px">Up next</span></div><div class="tl-d">All 23 CSV files cleaned with Pandas, feature schema documented, preprocessing pipeline built, first Weka experiment completed</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--blue-bg);color:var(--blue)">Wk 5–6</div>
+      <div><div class="tl-t">Feature engineering</div><div class="tl-d">Key traffic features selected, normal behaviour baselines built per device type, exploratory data analysis visualisations produced</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--blue-bg);color:var(--blue)">Wk 7–8</div>
+      <div><div class="tl-t">Baseline modelling</div><div class="tl-d">Statistical baselines complete, initial anomaly flags generated, Weka model comparison documented and reported to Jawad</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--amb-bg);color:var(--amber)">Wk 9–10</div>
+      <div><div class="tl-t">ML model development</div><div class="tl-d">Isolation Forest and LOF trained in Scikit-learn, hyperparameter tuning done, precision/recall/F1 scores reported</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--amb-bg);color:var(--amber)">Wk 11–12</div>
+      <div><div class="tl-t">Prototype delivery <span class="badge b-amber" style="margin-left:6px">T1 delivery to Jawad</span></div><div class="tl-d">Working prototype: ML model connected to Streamlit dashboard. APM can interact with it. Not just documentation — something functional.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Trimester 2 — Weeks 13 to 24 (Final polished product)</div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--red-bg);color:var(--red)">Wk 13–16</div>
+      <div><div class="tl-t">Model refinement</div><div class="tl-d">Hyperparameter tuning, ensemble method optimisation, false positive reduction, supervised models if labelled data available</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--red-bg);color:var(--red)">Wk 17–20</div>
+      <div><div class="tl-t">Full dashboard and testing</div><div class="tl-d">Complete interactive dashboard with device risk ranking, drill-down views, compliance export, end-to-end system testing</div></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-wk" style="background:var(--red-bg);color:var(--red)">Wk 21–24</div>
+      <div><div class="tl-t">Final delivery <span class="badge b-red" style="margin-left:6px">T2 delivery to Jawad</span></div><div class="tl-d">Technical documentation complete, compliance reports ready, live demonstration to APM, full handover — APM owns and can maintain the system</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Meeting cadence commitment to Jawad</div>
+    <div class="row"><span class="row-k">Client meetings</span><span class="row-v">Fortnightly with Jawad — every 2 weeks without exception</span></div>
+    <div class="row"><span class="row-k">Meeting minutes</span><span class="row-v">Emailed to Jawad within 24 hours of every meeting</span></div>
+    <div class="row"><span class="row-k">Trello board</span><span class="row-v">Updated after every sprint — Jawad can check progress at any time</span></div>
+    <div class="row"><span class="row-k">Blockers</span><span class="row-v">Communicated proactively — we do not wait until the meeting to raise issues</span></div>
+    <div class="row"><span class="row-k">Internal team meetings</span><span class="row-v">Weekly check-in every Monday — all 5 members</span></div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
