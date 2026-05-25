@@ -23,8 +23,8 @@ left, right = st.columns(2)
 with left:
     st.subheader("📊 Traffic Distribution")
     counts = df['label'].value_counts()
-    fig = px.pie(values=counts.values, names=counts.index,
-                 color_discrete_sequence=['#00c9a7','#ff5572','#ffa500'])
+    fig = px.pie(values=counts.values, names=counts.index, color=counts.index,
+                 color_discrete_map={'Malicious':'#ff5572','Benign':'#00c9a7'})
     st.plotly_chart(fig, use_container_width=True)
 
 with right:
