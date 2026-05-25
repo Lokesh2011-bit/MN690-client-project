@@ -7,7 +7,7 @@ st.set_page_config(page_title="IoT Anomaly Detection", page_icon="🛡️", layo
 st.title("🛡️ IoT Network Anomaly Detection System")
 st.caption("Dataset: IoT-23 | Models: Isolation Forest + Local Outlier Factor Ensemble")
 
-df = pd.read_csv('/Users/loki/Desktop/results.csv')
+df = pd.read_csv('results.csv')
 
 # Top metrics
 col1, col2, col3, col4 = st.columns(4)
