@@ -1,0 +1,8 @@
+
+=== MN692 TESTING SCENARIO RESULTS ===
+Source: IoT-23 Dataset (MN690.csv)
+Total flows analysed: 71776
+Benign flows: 19952
+Malicious flows: 51824
+Attack rate: 72.2%
+Attack types included: Botnet, C&C, DDoS, Port Scan, SSH Brute Force
